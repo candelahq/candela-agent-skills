@@ -5,9 +5,13 @@ description: |
   LLM observability platform. Covers the Go backend, Rust sidecar, Next.js UI,
   storage layer, proxy architecture, proto codegen, and testing patterns.
   Use this skill when developing or contributing to the candela repository.
+  Candela also has an editor plugin ecosystem: candela-vscode (VS Code / Open VSX),
+  candela-jetbrains (IntelliJ/GoLand/PyCharm), opencode-candela (terminal),
+  and candela-cline (Cline integration). These plugins share the same
+  ConnectRPC/REST API surface documented here.
 license: Apache-2.0
 metadata:
-  version: v1
+  version: v2
   publisher: candelahq
 ---
 
@@ -24,7 +28,7 @@ Candela is a monorepo with four major components:
 | Sidecar | `cmd/candela-sidecar/` | Go | Minimal container sidecar (Pub/Sub + OTLP) |
 | Rust workspace | `rust/` | Rust | Incremental rewrite (proxy, processor, sidecar) |
 | Web UI | `ui/` | TypeScript/Next.js 16 | Dashboard, traces, admin panel |
-| SDKs | `sdks/` | Python, TS, Go, Kotlin, Rust | Enrichment SDKs for tenant/job metadata |
+| SDKs | `sdks/` | Python, TS | Enrichment SDKs (simplified — Go/Kotlin/Rust SDKs removed) |
 
 ---
 
@@ -87,7 +91,9 @@ This generates:
 ### ConnectRPC Transport
 
 The backend serves ConnectRPC on port **8181**. The UI communicates via Connect protocol
-(not gRPC-Web). Service paths follow the pattern:
+(not gRPC-Web). The consolidated `GetDashboardData` RPC (with `include_budget=true`)
+replaces the older `GetUsageSummary` + `GetMyBudget` fan-out — plugins use this single
+call for usage, budget, and grant data. Service paths follow the pattern:
 ```
 POST http://localhost:8181/candela.v1.TraceService/ListTraces
 POST http://localhost:8181/candela.v1.DashboardService/GetDashboardData
@@ -167,6 +173,10 @@ Routes are registered at `/proxy/{provider}/`:
 2. Implement any provider-specific request/response translation
 3. Add cost calculation entries in `pkg/costcalc/`
 4. Add functional tests in `test/functional/`
+
+> **Note**: OpenAI models were purged from `pkg/costcalc/` — only Google and
+> Anthropic models are priced. Users routing through the OpenAI proxy endpoint
+> will see `$0.00` cost unless they add entries back.
 
 ---
 
@@ -324,7 +334,7 @@ Proto generation requires `BUF_TOKEN` secret.
 
 ### GoReleaser
 
-Tagged releases (e.g., `v0.4.7`) trigger GoReleaser for multi-platform binaries.
+Tagged releases (e.g., `v0.5.4`) trigger GoReleaser for multi-platform binaries.
 Sidecar has its own tag prefix: `sidecar-v*`.
 
 ### Homebrew

@@ -10,6 +10,8 @@ These skills teach AI coding agents (Gemini, Claude, etc.) the architecture, con
 |-------|-----------|-------|
 | `candela` | [candelahq/candela](https://github.com/candelahq/candela) | Go · Rust · Next.js · DuckDB · BigQuery |
 | `candela-desktop` | [candelahq/candela-desktop](https://github.com/candelahq/candela-desktop) | Flutter · Dart · Riverpod · ConnectRPC |
+| `candela-jetbrains` | [candelahq/candela-jetbrains](https://github.com/candelahq/candela-jetbrains) | Kotlin · IntelliJ Platform SDK · Gradle |
+| `candela-vscode` | [candelahq/candela-vscode](https://github.com/candelahq/candela-vscode) | TypeScript · VS Code API · Open VSX |
 
 ## Installation
 
@@ -24,6 +26,8 @@ git clone https://github.com/candelahq/candela-agent-skills.git
 # Symlink into Antigravity skills
 ln -s $(pwd)/candela-agent-skills/candela ~/.gemini/antigravity/skills/candela
 ln -s $(pwd)/candela-agent-skills/candela-desktop ~/.gemini/antigravity/skills/candela-desktop
+ln -s $(pwd)/candela-agent-skills/candela-jetbrains ~/.gemini/antigravity/skills/candela-jetbrains
+ln -s $(pwd)/candela-agent-skills/candela-vscode ~/.gemini/antigravity/skills/candela-vscode
 ```
 
 ### Other Agents
@@ -38,6 +42,10 @@ candela-agent-skills/
 │   └── SKILL.md          # Go backend, Rust, Next.js UI, storage, proxy
 ├── candela-desktop/
 │   └── SKILL.md          # Flutter desktop app, Riverpod, ConnectRPC
+├── candela-jetbrains/
+│   └── SKILL.md          # JetBrains IDE plugin, Kotlin, Gradle
+├── candela-vscode/
+│   └── SKILL.md          # VS Code extension, TypeScript, Open VSX
 └── README.md
 ```
 

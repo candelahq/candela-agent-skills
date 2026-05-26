@@ -1,14 +1,14 @@
 ---
 name: candela-desktop
 description: |
-  Development conventions for the candelahq/candela-desktop repository — the
+  Development conventions for the candelahq/candela-desktop repository (v0.5.1) — the
   cross-platform Flutter/Dart desktop client for Candela. Covers Riverpod state
-  management, ConnectRPC integration, ADC credential handling, CLI process
+  management, ConnectRPC integration, CandelaAuthService, CLI process
   management, and build workflows.
   Use this skill when developing or contributing to the candela-desktop repository.
 license: Apache-2.0
 metadata:
-  version: v1
+  version: v2
   publisher: candelahq
 ---
 
@@ -118,7 +118,7 @@ The desktop app uses **Riverpod** with code-gen annotations for reactive state.
                    │
 ┌──────────────────▼────────────────────────────┐
 │  State Providers (async, UI-facing)           │
-│  DashboardNotifier, TracesNotifier, etc.      │
+│  DashboardController, TracesNotifier, etc.     │
 │  (depend on service providers, drive UI)      │
 └───────────────────────────────────────────────┘
 ```
@@ -155,15 +155,28 @@ ClientChannel baseChannel(Ref ref) {
 
 ```dart
 @riverpod
-class DashboardNotifier extends _$DashboardNotifier {
+class DashboardController extends _$DashboardController {
+  bool _disposed = false;
+
   @override
   Future<DashboardState> build() async {
+    ref.onDispose(() => _disposed = true);
     final api = ref.watch(connectApiServiceProvider);
     final userId = ref.watch(currentUserIdProvider);
     return _fetchDashboard(api, userId);
   }
 
+  /// Bridge for imperative listeners (e.g. tray-menu refresh).
+  void onStateChanged(void Function(DashboardState) callback) {
+    ref.listenSelf((_, next) {
+      if (!_disposed && next is AsyncData<DashboardState>) {
+        callback(next.value);
+      }
+    });
+  }
+
   Future<void> refresh() async {
+    if (_disposed) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => build());
   }
@@ -231,16 +244,17 @@ Key models:
 
 ## ADC & Authentication
 
-### GCP Credentials (Application Default Credentials)
+### CandelaAuthService (replaces gcloud CLI — PR #78)
 
-For Vertex AI model access, the desktop app relies on ADC from the host machine:
+`CandelaAuthService` now handles all authentication natively, replacing the previous
+`gcloud auth application-default login` dependency:
 
-```bash
-gcloud auth application-default login --scopes=openid,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/userinfo.email
-```
+- OAuth 2.0 PKCE flow for user login
+- Automatic token refresh and persistence
+- No external CLI tools required
 
-The `candela` CLI proxy handles token refresh. The desktop app itself does **not**
-manage OAuth tokens directly — it delegates to the CLI process.
+The `candela` CLI proxy still handles Vertex AI token forwarding, but the desktop app
+no longer requires `gcloud` to be installed.
 
 ### Server Authentication
 
@@ -331,8 +345,8 @@ flutter test integration_test/
    `candela-protos` and regenerate stubs
 2. **Service**: Add the mapping in `ConnectApiService._mapDashboard()`
 3. **Model**: Add the field to `DashboardData` in `lib/models/`
-4. **Notifier**: `DashboardNotifier` already fetches the full response — just expose
-   the new field
+4. **Controller**: `DashboardController` already fetches the full response — just expose
+   the new field. Uses immutable `state.copyWith()` updates and disposal guards.
 5. **Widget**: Create a card widget in `lib/widgets/`, add it to `dashboard_screen.dart`
 
 ### Adding a New Screen
@@ -387,6 +401,20 @@ GitHub Actions runs:
 2. `dart analyze --fatal-infos`
 3. `flutter test`
 4. `flutter build macos` (on macOS runner)
+
+---
+
+## Recent Changes (v0.5.1)
+
+Key changes from recent PRs:
+
+| PR | Change | Details |
+|----|--------|---------|
+| #85 | Update button | Calls `performBrewUpgrade()` with confirmation dialog |
+| #85 | maxSyntheticSpans clamp | Fixed span limit clamping for large traces |
+| #85 | Model deduplication | Models deduplicated by model name in models page |
+| #79 | Dynamic UserScope toggle | Admin views can toggle user scope filtering |
+| #77 | Pricing columns | Models page shows pricing + cache efficiency badges |
 
 ---
 
