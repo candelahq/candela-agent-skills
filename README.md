@@ -8,10 +8,11 @@ These skills teach AI coding agents (Gemini, Claude, etc.) the architecture, con
 
 | Skill | Repository | Stack |
 |-------|-----------|-------|
-| `candela` | [candelahq/candela](https://github.com/candelahq/candela) | Go · Rust · Next.js · DuckDB · BigQuery |
-| `candela-desktop` | [candelahq/candela-desktop](https://github.com/candelahq/candela-desktop) | Flutter · Dart · Riverpod · ConnectRPC |
+| `candela` | [candelahq/candela](https://github.com/candelahq/candela) | Go · Rust · Next.js · DuckDB · BigQuery · SQLite |
+| `candela-desktop` | [candelahq/candela-desktop](https://github.com/candelahq/candela-desktop) | Flutter · Dart · Riverpod · ConnectRPC · WebView |
 | `candela-jetbrains` | [candelahq/candela-jetbrains](https://github.com/candelahq/candela-jetbrains) | Kotlin · IntelliJ Platform SDK · Gradle |
 | `candela-vscode` | [candelahq/candela-vscode](https://github.com/candelahq/candela-vscode) | TypeScript · VS Code API · Open VSX |
+| `opencode-candela` | [candelahq/opencode-candela](https://github.com/candelahq/opencode-candela) | TypeScript · OpenCode Plugin API · Node.js |
 
 ## Installation
 
@@ -28,6 +29,7 @@ ln -s $(pwd)/candela-agent-skills/candela ~/.gemini/antigravity/skills/candela
 ln -s $(pwd)/candela-agent-skills/candela-desktop ~/.gemini/antigravity/skills/candela-desktop
 ln -s $(pwd)/candela-agent-skills/candela-jetbrains ~/.gemini/antigravity/skills/candela-jetbrains
 ln -s $(pwd)/candela-agent-skills/candela-vscode ~/.gemini/antigravity/skills/candela-vscode
+ln -s $(pwd)/candela-agent-skills/opencode-candela ~/.gemini/antigravity/skills/opencode-candela
 ```
 
 ### Other Agents
@@ -41,11 +43,13 @@ candela-agent-skills/
 ├── candela/
 │   └── SKILL.md          # Go backend, Rust, Next.js UI, storage, proxy
 ├── candela-desktop/
-│   └── SKILL.md          # Flutter desktop app, Riverpod, ConnectRPC
+│   └── SKILL.md          # Flutter desktop app, Riverpod, ConnectRPC, WebView
 ├── candela-jetbrains/
 │   └── SKILL.md          # JetBrains IDE plugin, Kotlin, Gradle
 ├── candela-vscode/
 │   └── SKILL.md          # VS Code extension, TypeScript, Open VSX
+├── opencode-candela/
+│   └── SKILL.md          # OpenCode plugin, lifecycle hooks, attribution
 └── README.md
 ```
 

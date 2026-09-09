@@ -111,7 +111,7 @@ cost, and budget percentage. Features:
 - Auto-refresh on configurable interval (`refreshIntervalSeconds`)
 - Budget urgency colors (green/yellow/red based on threshold)
 - Click to show cost summary popup
-- Disposal-safe with coroutine scope management
+- Disposal-safe coroutine scope managed via project-level `CandelaCoroutineService` with `SupervisorJob`
 
 ### CandleNotifications.kt
 
@@ -125,7 +125,7 @@ Budget warning notifications using IntelliJ's notification system:
 Four menu actions registered under Tools → Candela:
 - `ShowCostSummaryAction` — dialog with today's usage breakdown
 - `CheckBudgetAction` — budget status with grants
-- `OpenDashboardAction` — opens web dashboard in browser
+- `OpenDashboardAction` — opens `/_local/` on the effective configured server URL in browser (default: `http://localhost:8181/_local/`)
 - `RefreshStatusAction` — force-refresh status bar
 
 ### CandleSettings.kt (`settings/`)

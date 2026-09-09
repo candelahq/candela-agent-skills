@@ -84,8 +84,8 @@ The extension entry point. On activation (`onStartupFinished`):
 
 | Command | Title | Description |
 |---------|-------|-------------|
-| `candela.showDashboard` | Show Dashboard | Opens web dashboard in browser |
-| `candela.showCostSummary` | Show Cost Summary | Information message with usage breakdown |
+| `candela.showDashboard` | Show Dashboard | Opens `/_local/` on the effective resolved server URL in browser (default: `http://localhost:8181/_local/`) |
+| `candela.showCostSummary` | Show Cost Summary | Information message with usage breakdown and open dashboard action |
 | `candela.checkBudget` | Check Budget | Budget status with progress bar and grants |
 | `candela.refreshStatus` | Refresh Status | Force refresh + cache invalidation + health reset |
 
@@ -113,7 +113,7 @@ The HTTP client — the core API layer shared with the Cline plugin.
 
 ### discover.ts
 
-Auto-discovers the Candela server URL. Resolution order:
+Auto-discovers the Candela server URL. If `candela.serverUrl` is empty or unset, the extension dynamically falls back to `discoverCandelaUrl()`. Resolution order:
 
 1. `CANDELA_PROXY_URL` env var
 2. `CANDELA_CONFIG` env var → parse port from YAML
@@ -129,7 +129,7 @@ Uses regex-based YAML parsing to avoid a dependency.
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `candela.serverUrl` | string | `http://localhost:8181` | Candela server URL |
+| `candela.serverUrl` | string | `""` | Candela server URL (empty = auto-discover via `discoverCandelaUrl()`) |
 | `candela.statusBar.enabled` | boolean | `true` | Show status bar item |
 | `candela.statusBar.showBudget` | boolean | `true` | Show budget % in status bar |
 | `candela.budgetWarning.threshold` | number | `80` | Warning at N% budget usage |

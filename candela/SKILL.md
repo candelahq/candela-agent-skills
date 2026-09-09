@@ -112,10 +112,15 @@ in `pkg/storage/store.go`:
 | `SpanReader` | Read-only queries | DuckDB, SQLite, BigQuery |
 | `TraceStore` | Convenience (both) | DuckDB, SQLite, BigQuery |
 | `CombinedUsageReader` | Optional: single-query usage+models | BigQuery |
-| `UserStore` | User/budget/grant CRUD | Firestore |
+| `UserStore` | User/budget/grant CRUD | SQLite, Firestore |
 | `ProjectStore` | Project + API key management | DuckDB, SQLite |
 | `AnnotationStore` | Trace annotations | DuckDB, SQLite |
 | `SyncStore` | Offline store-and-forward | DuckDB, SQLite |
+
+### UserStore Implementations
+
+- **SQLite UserStore** (`pkg/storage/sqlite/user_store.go`): Zero-cloud embedded user store supporting budgets, time-bounded grants, task budgets, rate limits, and audit logs. Default for self-hosted installations (`user_store.backend: "sqlite"`).
+- **Firestore UserStore** (`pkg/storage/firestoredb/`): Cloud-connected user store for distributed GCP enterprise deployments.
 
 ### Adding a New Storage Backend
 
@@ -172,20 +177,29 @@ Routes are registered at `/proxy/{provider}/`:
 1. Add the route registration in the proxy setup (follow existing provider patterns)
 2. Implement any provider-specific request/response translation
 3. Add cost calculation entries in `pkg/costcalc/`
-4. Add functional tests in `test/functional/`
-
-> **Note**: OpenAI models were purged from `pkg/costcalc/` — only Google and
-> Anthropic models are priced. Users routing through the OpenAI proxy endpoint
-> will see `$0.00` cost unless they add entries back.
+### Error Sanitization & Governance
+- **502 Bad Gateway Sanitization**: Upstream failures strip internal routing headers (e.g. `Via: candela-proxy`) to prevent infrastructure leakage.
+- **Model Access Tiers**: `ModelCatalogEntry.required_access` (proto field 18) controls access per model tier (`free`, `standard`, `pro`, `enterprise`). Pre-flight proxy checks verify user access before forwarding to providers.
 
 ---
 
-## CLI Proxy (`cmd/candela/`)
+## CLI Proxy & Tooling (`cmd/candela/`)
 
 The `candela` CLI operates in three modes:
 - **Solo Mode** — local models only, SQLite traces, no cloud
 - **Solo + Cloud** — local + Vertex AI direct (via ADC)
 - **Team Mode** — connects to shared Candela server
+
+### Subcommands (v0.8.x)
+
+| Command | Purpose |
+|---------|---------|
+| `candela doctor` | Automated diagnostics (ports, auth, SQLite, IAP reachability) |
+| `candela doctor --fix` | Automatically terminates orphan/conflicting processes holding ports 8181 or 1234 |
+| `candela watch` | Live SSE trace stream in terminal (supports `--model`, `--provider`, `--json`) |
+| `candela forecast` | 7-day weighted velocity analysis, runway projection, and month-end spend |
+| `candela auth login` | Native multi-cloud OAuth2/AWS credentials (no `gcloud` or `aws` CLI needed) |
+| `candela daemon` | Long-running background supervisor process |
 
 ### LM-Compatible Listener
 
@@ -195,7 +209,7 @@ merges local, cloud, and remote models. Smart routing sends requests to the righ
 ### Embedded UI
 
 The `/_local/` path serves an embedded vanilla JS management UI for runtime control,
-model management, and local traces. ConnectRPC services: `RuntimeService`.
+model management, and local traces. The `/spans` route serves the interactive span search UI. ConnectRPC services: `RuntimeService`.
 
 ---
 
