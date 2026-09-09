@@ -84,7 +84,7 @@ The extension entry point. On activation (`onStartupFinished`):
 
 | Command | Title | Description |
 |---------|-------|-------------|
-| `candela.showDashboard` | Show Dashboard | Opens local management UI in browser (`http://localhost:8181/_local/`) |
+| `candela.showDashboard` | Show Dashboard | Opens `/_local/` on the effective resolved server URL in browser (default: `http://localhost:8181/_local/`) |
 | `candela.showCostSummary` | Show Cost Summary | Information message with usage breakdown and open dashboard action |
 | `candela.checkBudget` | Check Budget | Budget status with progress bar and grants |
 | `candela.refreshStatus` | Refresh Status | Force refresh + cache invalidation + health reset |

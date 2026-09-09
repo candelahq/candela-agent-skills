@@ -119,7 +119,7 @@ When talking to a validated Candela endpoint, the plugin attaches:
 | Header | Source | Purpose |
 |---|---|---|
 | `X-Mission-Id` | `process.env.CANDELA_MISSION_ID` | Groups multi-step agent workflows across child sessions |
-| `X-Candela-Job-Id` | `process.env.CANDELA_MISSION_ID` | Backend job attribution for task-scoped budget tracking |
+| `X-Candela-Job-Id` | `process.env.CANDELA_JOB_ID` (or `CANDELA_MISSION_ID`) | Backend job attribution for task-scoped budget tracking |
 | `X-Git-Commit` | Workspace git repository | Attaches active git commit SHA to generated traces |
 | `X-Session-Tag` | `.opencode.json` settings | Arbitrary team/environment tags for filtering |
 

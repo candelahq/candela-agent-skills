@@ -394,7 +394,7 @@ Distributed via `candelahq/homebrew-tap`:
 brew install --cask candelahq/tap/candela-desktop
 ```
 
-> **Architecture Note**: The Homebrew cask targets Apple Silicon (`arm64`). Intel Macs run via Rosetta 2 or manual DMG release download. The cask strips Gatekeeper quarantine flags automatically (`xattr -cr /Applications/Candela.app`).
+> **Architecture Note**: The Homebrew cask targets Apple Silicon (`arm64`). Intel Macs require an `x86_64` or universal build from manual GitHub releases (Rosetta 2 cannot translate arm64 binaries for Intel machines). The app is currently ad-hoc signed; proper Developer ID signing and notarization are planned for release builds.
 
 ### SearchWebViewScreen (Embedded Spans)
 
