@@ -1,10 +1,10 @@
 ---
 name: candela-desktop
 description: |
-  Development conventions for the candelahq/candela-desktop repository (v0.5.1) — the
+  Development conventions for the candelahq/candela-desktop repository (v0.7.1+) — the
   cross-platform Flutter/Dart desktop client for Candela. Covers Riverpod state
-  management, ConnectRPC integration, CandelaAuthService, CLI process
-  management, and build workflows.
+  management, ConnectRPC integration, Embedded Span Search WebView,
+  CandelaAuthService, CLI process management, and build workflows.
   Use this skill when developing or contributing to the candela-desktop repository.
 license: Apache-2.0
 metadata:
@@ -26,14 +26,14 @@ GUI for the Candela LLM observability platform. It connects to either a local
 ┌─────────────┐     ConnectRPC      ┌──────────────────┐
 │  Flutter UI  │ ←───(HTTP/2)────→  │  Candela Server   │
 │  (Riverpod)  │                    │  (Go, port 8181)  │
-└──────┬──────┘                    └──────────────────┘
-       │
-       │ Process.start()
-       ▼
-┌──────────────┐
-│  candela CLI  │  ← local proxy mode
-│  (installed)  │     (port 1234 + 8181)
-└──────────────┘
+└──────┬──────┘                    └─────────┬────────┘
+       │                                     │
+       │ Process.start()                     │ /spans
+       ▼                                     ▼
+┌──────────────┐   Embedded WebView  ┌──────────────────┐
+│  candela CLI │ ──────────────────▶ │ Span Search UI   │
+│  (installed) │                     │ (port 8181/spans)│
+└──────────────┘                     └──────────────────┘
 ```
 
 ---
@@ -387,12 +387,23 @@ flutter build macos --release
 # Output: build/macos/Build/Products/Release/Candela.app
 ```
 
-### Homebrew Cask
+### Homebrew Cask & Architecture
 
 Distributed via `candelahq/homebrew-tap`:
 ```bash
 brew install --cask candelahq/tap/candela-desktop
 ```
+
+> **Architecture Note**: The Homebrew cask targets Apple Silicon (`arm64`). Intel Macs run via Rosetta 2 or manual DMG release download. The cask strips Gatekeeper quarantine flags automatically (`xattr -cr /Applications/Candela.app`).
+
+### SearchWebViewScreen (Embedded Spans)
+
+`lib/screens/search/search_webview_screen.dart` renders an embedded WebView connected to the local proxy's `/spans` route (`http://127.0.0.1:8181/spans`). App Transport Security (ATS) is enabled on macOS with `NSAllowsLocalNetworking: true`.
+
+### Formatting Conventions (Multi-Dart SDK)
+
+To avoid formatting conflicts between Dart SDK 3.11 and 3.13 in CI:
+* Use **in-body platform guards** in test cases (`if (!Platform.isMacOS) return;`) rather than ternary expressions in `skip:` parameters.
 
 ### CI/CD
 
@@ -404,12 +415,13 @@ GitHub Actions runs:
 
 ---
 
-## Recent Changes (v0.5.1)
+## Recent Changes (v0.7.1)
 
 Key changes from recent PRs:
 
 | PR | Change | Details |
 |----|--------|---------|
+| #162 | WebView & Platform Guards | Route webview to `:8181/spans`, ATS local networking, in-body platform guards for stable multi-Dart formatting |
 | #85 | Update button | Calls `performBrewUpgrade()` with confirmation dialog |
 | #85 | maxSyntheticSpans clamp | Fixed span limit clamping for large traces |
 | #85 | Model deduplication | Models deduplicated by model name in models page |
